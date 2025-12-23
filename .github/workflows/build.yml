@@ -191,7 +191,17 @@ jobs:
           echo -e "\nCONFIG_KPROBE_EVENTS=y" >> ./arch/${{ env.ARCH }}/configs/${{ env.DEFCONFIG_NAME }}
 
           cat ./arch/${{ env.ARCH }}/configs/${{ env.DEFCONFIG_NAME }}
-
+            
+      - name: "🔍 List possible defconfigs"
+        working-directory: ./${{ env.kernelDir }}/${{ env.kernelName }}
+        run: |
+          echo "PWD: $(pwd)"
+          echo "Listing arch/arm64/configs:"
+          ls arch/arm64/configs || echo "no arch/arm64/configs dir"
+          echo
+          echo "Grepping for akita / gki / gs201:"
+          ls arch/arm64/configs | grep -Ei 'akita|gki|gs201' || echo "no matching defconfigs"
+          
       - name: "👍 Make defconfig"
         working-directory: ./${{ env.kernelDir }}/${{ env.kernelName }}
         env:
