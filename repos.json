@@ -1,6 +1,6 @@
 [  {
     "kernelSource": {
-      "name": "Tensor101 NetHunter",
+      "name": "tensor101-nethunter",
       "repo": "https://github.com/LineageOS/android_kernel_google_gs-6.1_devices",
       "branch": "lineage-23.2",
       "device": "akita"
