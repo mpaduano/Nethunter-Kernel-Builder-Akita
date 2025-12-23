@@ -1,8 +1,8 @@
 [  {
     "kernelSource": {
       "name": "tensor101-nethunter",
-      "repo": "https://github.com/LineageOS/android_kernel_google_gs-6.1_devices",
-      "branch": "lineage-23.2",
+      "repo": "https://github.com/kerneltoast/android_kernel_google_zuma",
+      "branch": "16.0.0-sultan",
       "device": "akita"
     },
     "withKernelSU": false,
