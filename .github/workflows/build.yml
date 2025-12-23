@@ -28,7 +28,7 @@ jobs:
         id: generate-matrix
         run: |
           echo "repos<<EOF" >> $GITHUB_OUTPUT
-          cat  ${{ env.CONFIGURATION }} >> $GITHUB_OUTPUT
+          cat ${{ env.CONFIGURATION }} >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
   Build-Kernel:
@@ -42,28 +42,30 @@ jobs:
       matrix:
         repos: ${{ fromJSON(needs.Set-repos.outputs.repos) }}
     env:
+      # Working dir name based on matrix (fine to keep)
       kernelDir: ${{ matrix.repos.kernelSource.name }}_${{ matrix.repos.kernelSource.device }}
 
-     kernelName: android_kernel_google_zuma 
-     kernelRepo: https://github.com/kerneltoast/android_kernel_google_zuma
-     kernelBranch: 16.0.0-sultan
-     kernelDevice: akita
+      # Hard-coded kernel source for Pixel 8a / zuma
+      kernelName: android_kernel_google_zuma
+      kernelRepo: https://github.com/kerneltoast/android_kernel_google_zuma
+      kernelBranch: 16.0.0-sultan
+      kernelDevice: akita
 
-      # NOTE: we'll revisit this after toolchain issues are fixed
-      DEFCONFIG_NAME: vendor/$_defconfig
+      # Start with gki_defconfig – can adjust after we see listing
+      DEFCONFIG_NAME: gki_defconfig
 
       withKernelSU: ${{ matrix.repos.withKernelSU }}
+      ARCH: ${{ matrix.repos.params.ARCH }}
+
     steps:
       - name: "✨ Create working dir"
-        run: mkdir -p $kernelDir
+        run: mkdir -p "$kernelDir"
 
-      # Optional but recommended: see where we are
       - name: "📂 Show workspace"
         run: |
           echo "PWD is: $(pwd)"
           ls
 
-      # Free up space on the runner BEFORE installing packages / cloning big repos
       - name: "🧹 Free up space on runner"
         run: |
           echo "=== Disk usage BEFORE cleanup ==="
@@ -90,9 +92,8 @@ jobs:
         working-directory: ./${{ env.kernelDir }}
         run: |
           echo "Cloning kernel repo into: $(pwd)/${{ env.kernelName }}"
-          git clone --recursive --branch $kernelBranch $kernelRepo $kernelName --depth=1
+          git clone --recursive --branch "$kernelBranch" "$kernelRepo" "$kernelName" --depth=1
 
-      # Check disk usage BEFORE cloning the heavy clang toolchain
       - name: "📏 Check disk usage before cloning toolchains"
         run: |
           echo "=== df -h ==="
@@ -172,6 +173,7 @@ jobs:
 
           extra_params=$(echo "$extraParams" | jq -r ' to_entries[] | select(.value != "") | "\(.key)=\(.value)"' | tr "\n" " " | sed 's/ $//')
           echo "args=$args $extra_params" >> $GITHUB_OUTPUT
+
       - name: "😋 Update KernelSU"
         working-directory: ./${{ env.kernelDir }}/${{ env.kernelName }}
         if: ${{ env.withKernelSU == 'true' }}
@@ -190,7 +192,7 @@ jobs:
           echo -e "\nCONFIG_KPROBE_EVENTS=y" >> ./arch/${{ env.ARCH }}/configs/${{ env.DEFCONFIG_NAME }}
 
           cat ./arch/${{ env.ARCH }}/configs/${{ env.DEFCONFIG_NAME }}
-            
+
       - name: "🔍 List possible defconfigs"
         working-directory: ./${{ env.kernelDir }}/${{ env.kernelName }}
         run: |
@@ -198,9 +200,9 @@ jobs:
           echo "Listing arch/arm64/configs:"
           ls arch/arm64/configs || echo "no arch/arm64/configs dir"
           echo
-          echo "Grepping for akita / gki / gs201:"
-          ls arch/arm64/configs | grep -Ei 'akita|gki|gs201' || echo "no matching defconfigs"
-          
+          echo "Grepping for zuma / gki / akita:"
+          ls arch/arm64/configs | grep -Ei 'zuma|gki|akita' || echo "no matching defconfigs"
+
       - name: "👍 Make defconfig"
         working-directory: ./${{ env.kernelDir }}/${{ env.kernelName }}
         env:
