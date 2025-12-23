@@ -172,6 +172,35 @@ jobs:
 
           extra_params=$(echo "$extraParams" | jq -r ' to_entries[] | select(.value != "") | "\(.key)=\(.value)"' | tr "\n" " " | sed 's/ $//')
           echo "args=$args $extra_params" >> $GITHUB_OUTPUT
+          
+      - name: "🔎 Find akita defconfig"
+        working-directory: ./${{ env.kernelDir }}/${{ env.kernelName }}
+        run: |
+          echo "PWD: $(pwd)"
+          echo "Searching for *akita_defconfig* ..."
+          find . -maxdepth 6 -type f -iname '*akita_defconfig*' -print || echo "No akita_defconfig found"
+          
+      - name: "📦 Prepare defconfig for akita"
+        working-directory: ./${{ env.kernelDir }}/${{ env.kernelName }}
+        run: |
+          # Try to auto-detect the akita defconfig path
+          DEFCONF_PATH="$(find . -maxdepth 6 -type f -iname '*akita_defconfig*' | head -n1)"
+
+          if [ -z "$DEFCONF_PATH" ]; then
+            echo "ERROR: Could not find any *akita_defconfig* in this tree."
+            exit 1
+          fi
+
+          echo "Using defconfig from: $DEFCONF_PATH"
+
+          # Make the directory layout that the kernel build expects
+          mkdir -p arch/arm64/configs/vendor
+
+          # Copy (or overwrite) into the expected location
+          cp "$DEFCONF_PATH" arch/arm64/configs/vendor/akita_defconfig
+
+          echo "Resulting configs/vendor contents:"
+          ls -R arch/arm64/configs
 
       - name: "😋 Update KernelSU"
         working-directory: ./${{ env.kernelDir }}/${{ env.kernelName }}
