@@ -42,17 +42,18 @@ jobs:
       matrix:
         repos: ${{ fromJSON(needs.Set-repos.outputs.repos) }}
     env:
-      # Working dir name based on matrix (fine to keep)
-      kernelDir: ${{ matrix.repos.kernelSource.name }}_${{ matrix.repos.kernelSource.device }}
+        kernelDir: ${{ matrix.repos.kernelSource.name }}_${{ matrix.repos.kernelSource.device }}
+        kernelName: android_kernel_google_zuma
+        kernelRepo: https://github.com/kerneltoast/android_kernel_google_zuma
+        kernelBranch: 16.0.0-sultan
+        kernelDevice: akita
+    
+    DEFCONFIG_NAME: zuma_defconfig
 
-      # Hard-coded kernel source for Pixel 8a / zuma
-      kernelName: android_kernel_google_zuma
-      kernelRepo: https://github.com/kerneltoast/android_kernel_google_zuma
-      kernelBranch: 16.0.0-sultan
-      kernelDevice: akita
-
+      withKernelSU: ${{ matrix.repos.withKernelSU }}
+      ARCH: ${{ matrix.repos.params.ARCH }}
       # Start with gki_defconfig – can adjust after we see listing
-      DEFCONFIG_NAME: gki_defconfig
+      DEFCONFIG_NAME: zuma_defconfig
 
       withKernelSU: ${{ matrix.repos.withKernelSU }}
       ARCH: ${{ matrix.repos.params.ARCH }}
@@ -228,7 +229,8 @@ jobs:
           args: ${{ steps.generate-args.outputs.args }}
         run: |
           echo "PATH Variable: $PATH"
-          make ${args}
+          echo "Using make args: $args"
+          make $args V=1
 
       - name: "🏴‍☠️ Post Action "
         run: |
