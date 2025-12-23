@@ -1,11 +1,11 @@
 [  {
     "kernelSource": {
       "name": "Tensor101 NetHunter",
-      "repo": "https://github.com/gs-bluraviole/android_kernel_google_gs101/kernel/configs/",
-      "branch": "android-gs-raviole-6.1-android15-qpr2",
-      "device": "bluejay"
+      "repo": "https://github.com/LineageOS/android_kernel_google_gs-6.1_devices",
+      "branch": "lineage-23.2",
+      "device": "akita"
     },
-    "withKernelSU": true,
+    "withKernelSU": false,
     "toolchains": [
       {
         "repo": "https://android.googlesource.com/platform/prebuilts/gas/linux-x86",
@@ -13,9 +13,9 @@
         "name": "gas"
       },
       {
-        "repo": "https://gitlab.com/ThankYouMario/android_prebuilts_clang-standalone/",
-        "branch": "18",
-        "name": "clang"
+  "repo": "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86",
+  "branch": "master",
+  "name": "clang"
       }
     ],
     "params": {
