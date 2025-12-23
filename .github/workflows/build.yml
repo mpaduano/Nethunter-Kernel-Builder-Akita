@@ -16,7 +16,9 @@ jobs:
     steps:
       - name: "😄 Checkout"
         uses: actions/checkout@v4
-        
+        with:
+          fetch-depth: 1
+
       - name: Show current directory and list
         run: |
           echo "PWD is: $(pwd)"
@@ -47,6 +49,7 @@ jobs:
       kernelBranch: ${{ matrix.repos.kernelSource.branch }}
       kernelDevice: ${{ matrix.repos.kernelSource.device }}
 
+      # NOTE: we'll revisit this after toolchain issues are fixed
       DEFCONFIG_NAME: vendor/${{ matrix.repos.kernelSource.device }}_defconfig
 
       withKernelSU: ${{ matrix.repos.withKernelSU }}
@@ -54,33 +57,72 @@ jobs:
       - name: "✨ Create working dir"
         run: mkdir -p $kernelDir
 
+      # Optional but recommended: see where we are
+      - name: "📂 Show workspace"
+        run: |
+          echo "PWD is: $(pwd)"
+          ls
+
+      # Free up space on the runner BEFORE installing packages / cloning big repos
+      - name: "🧹 Free up space on runner"
+        run: |
+          echo "=== Disk usage BEFORE cleanup ==="
+          df -h
+
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /usr/local/lib/android || true
+          sudo rm -rf /opt/ghc || true
+          sudo rm -rf /opt/hostedtoolcache || true
+
+          echo "=== Disk usage AFTER cleanup ==="
+          df -h
+
       - name: "⭐ Install prerequisites"
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential bc curl git zip ftp gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi libssl-dev lftp zstd wget libfl-dev python3 libarchive-tools
+          sudo apt-get install -y \
+            build-essential bc curl git zip ftp \
+            gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi \
+            libssl-dev lftp zstd wget libfl-dev \
+            python3 libarchive-tools
 
       - name: "🌟 Clone kernel source => (${{ env.kernelRepo }})"
         working-directory: ./${{ env.kernelDir }}
         run: |
+          echo "Cloning kernel repo into: $(pwd)/${{ env.kernelName }}"
           git clone --recursive --branch $kernelBranch $kernelRepo $kernelName --depth=1
+
+      # Check disk usage BEFORE cloning the heavy clang toolchain
+      - name: "📏 Check disk usage before cloning toolchains"
+        run: |
+          echo "=== df -h ==="
+          df -h
+          echo
+          echo "=== Workspace size ==="
+          du -sh . || echo "du failed"
 
       - name: "💫 Get toolchains"
         working-directory: ./${{ env.kernelDir }}
         env:
           toolchains: "${{ toJSON(matrix.repos.toolchains) }}"
         run: |
-          toolchains_num="$(echo $toolchains | jq 'length')"
-          echo $toolchains_num
+          echo "PWD for toolchains: $(pwd)"
+          toolchains_num="$(echo "$toolchains" | jq 'length')"
+          echo "Toolchains to clone: $toolchains_num"
+
           for ((i=0;i<toolchains_num;i++)); do
-            name=$(echo $toolchains | jq -r ".[$i].name")
-            repo=$(echo $toolchains | jq -r ".[$i].repo")
-            branch=$(echo $toolchains | jq -r ".[$i].branch")
-            git clone --recursive --branch $branch $repo $name --depth=1
-            echo "$(pwd)/$name/" >> $GITHUB_PATH
-            echo "$(pwd)/$name/bin" >> $GITHUB_PATH
+            name=$(echo "$toolchains" | jq -r ".[$i].name")
+            repo=$(echo "$toolchains" | jq -r ".[$i].repo")
+            branch=$(echo "$toolchains" | jq -r ".[$i].branch")
+
+            echo "Cloning toolchain: $name from $repo (branch: $branch)"
+            git clone --recursive --branch "$branch" "$repo" "$name" --depth=1
+
+            echo "$(pwd)/$name/" >> "$GITHUB_PATH"
+            echo "$(pwd)/$name/bin" >> "$GITHUB_PATH"
           done
 
-          echo "PATH Variable: $PATH"
+          echo "PATH Variable after toolchains: $PATH"
 
       - name: "😎 Set args"
         id: generate-args
@@ -91,19 +133,19 @@ jobs:
           THREAD: $(nproc --all)
         run: |
           echo "PATH Variable: $PATH"
-          ARCH=$(echo $params | jq -r ".ARCH")
-          CROSS_COMPILE=$(echo $params | jq -r ".CROSS_COMPILE")
-          CROSS_COMPILE_COMPAT=$(echo $params | jq -r ".CROSS_COMPILE_COMPAT")
-          CROSS_COMPILE_ARM32=$(echo $params | jq -r ".CROSS_COMPILE_ARM32")
-          CLANG_TRIPLE=$(echo $params | jq -r ".CLANG_TRIPLE")
-          AR=$(echo $params | jq -r ".AR")
-          CC=$(echo $params | jq -r ".CC")
+          ARCH=$(echo "$params" | jq -r ".ARCH")
+          CROSS_COMPILE=$(echo "$params" | jq -r ".CROSS_COMPILE")
+          CROSS_COMPILE_COMPAT=$(echo "$params" | jq -r ".CROSS_COMPILE_COMPAT")
+          CROSS_COMPILE_ARM32=$(echo "$params" | jq -r ".CROSS_COMPILE_ARM32")
+          CLANG_TRIPLE=$(echo "$params" | jq -r ".CLANG_TRIPLE")
+          AR=$(echo "$params" | jq -r ".AR")
+          CC=$(echo "$params" | jq -r ".CC")
 
           echo "ARCH=$ARCH" >> $GITHUB_ENV
 
           args="-j$(nproc --all)"
           if [ -n "${{ env.OUT_DIR }}" ]; then
-            mkdir -p $(pwd)/${{ env.OUT_DIR }}
+            mkdir -p "$(pwd)/${{ env.OUT_DIR }}"
             args="$args O=$(pwd)/${{ env.OUT_DIR }}"
           fi
           if [ -n "$ARCH" ]; then
@@ -124,9 +166,11 @@ jobs:
           if [ -n "$CC" ]; then
             args="$args CC=$CC"
           fi
+
           echo "args=$args" >> $GITHUB_OUTPUT
           echo "extraParams_toJson: $extraParams"
-          extra_params=$(echo $extraParams | jq -r ' to_entries[] | select(.value != "") | "\(.key)=\(.value)"' | tr "\n" " " | sed 's/ $//')
+
+          extra_params=$(echo "$extraParams" | jq -r ' to_entries[] | select(.value != "") | "\(.key)=\(.value)"' | tr "\n" " " | sed 's/ $//')
           echo "args=$args $extra_params" >> $GITHUB_OUTPUT
 
       - name: "😋 Update KernelSU"
@@ -158,7 +202,7 @@ jobs:
 
       - name: "🏴‍☠️ Before Action "
         env:
-            args: ${{ steps.generate-args.outputs.args }}
+          args: ${{ steps.generate-args.outputs.args }}
         working-directory: ./${{ env.kernelDir }}/${{ env.OUT_DIR }}
         run: |
           echo "args ---> ${args}"
@@ -166,7 +210,7 @@ jobs:
           echo "CONFIG_OF_CONFIGFS=y" >> .config
           echo "CONFIG_OF_OVERLAY=y" >> .config
           cat .config
-          
+
       - name: "🎶 Build kernel"
         working-directory: ./${{ env.kernelDir }}/${{ env.kernelName }}
         env:
@@ -177,8 +221,6 @@ jobs:
 
       - name: "🏴‍☠️ Post Action "
         run: |
-          # make ${args} dtbs
-          # make ${args} dtboimage
           pwd
           find ./${{ env.kernelDir }}/${{ env.OUT_DIR }}/arch/${{ env.ARCH }}/ -type f
 
