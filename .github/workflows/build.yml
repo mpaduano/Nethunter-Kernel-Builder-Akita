@@ -41,15 +41,16 @@ jobs:
       fail-fast: false
       matrix:
         repos: ${{ fromJSON(needs.Set-repos.outputs.repos) }}
-    env:
-      # Working dir name based on matrix (fine to keep)
-      kernelDir: ${{ matrix.repos.kernelSource.name }}_${{ matrix.repos.kernelSource.device }}
 
-      # Hard-coded kernel source for Pixel 8a / zuma
+     env:
+      kernelDir: tensor101-nethunter_akita
       kernelName: android_kernel_google_zuma
       kernelRepo: https://github.com/kerneltoast/android_kernel_google_zuma
       kernelBranch: 16.0.0-sultan
       kernelDevice: akita
+      DEFCONFIG_NAME: zuma_defconfig
+      withKernelSU: ${{ matrix.repos.withKernelSU }}
+      ARCH: ${{ matrix.repos.params.ARCH }}
 
       # Use the platform defconfig from this tree
       DEFCONFIG_NAME: zuma_defconfig
