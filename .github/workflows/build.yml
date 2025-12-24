@@ -51,8 +51,8 @@ jobs:
       kernelBranch: 16.0.0-sultan
       kernelDevice: akita
 
-      # Start with gki_defconfig – can adjust after we see listing
-      DEFCONFIG_NAME: gki_defconfig
+      # Use the platform defconfig from this tree
+      DEFCONFIG_NAME: zuma_defconfig
 
       withKernelSU: ${{ matrix.repos.withKernelSU }}
       ARCH: ${{ matrix.repos.params.ARCH }}
@@ -211,56 +211,57 @@ jobs:
           echo "PATH Variable: $PATH"
           make ${{ env.args }} ${{ env.DEFCONFIG_NAME }}
 
-      - name: "🏴‍☠️ Before Action "
-        env:
-          args: ${{ steps.generate-args.outputs.args }}
-        working-directory: ./${{ env.kernelDir }}/${{ env.OUT_DIR }}
-        run: |
-          echo "args ---> ${args}"
-          echo "current path ---> $(pwd)"
-          echo "CONFIG_OF_CONFIGFS=y" >> .config
-          echo "CONFIG_OF_OVERLAY=y" >> .config
-          cat .config
-          
+      # Patch mm/vmscan.c to declare shrinker_rwsem if needed
       - name: "🐞 Patch shrinker_rwsem in vmscan"
         working-directory: ./${{ env.kernelDir }}/${{ env.kernelName }}
         run: |
-          echo "Checking for shrinker_rwsem declaration in mm/vmscan.c..."
+          echo "Checking for shrinker_rwsem uses in mm/vmscan.c..."
           if ! grep -q 'shrinker_rwsem' mm/vmscan.c; then
-          echo "No references to shrinker_rwsem found in vmscan.c, skipping patch."
-          exit 0
+            echo "No shrinker_rwsem references, skipping patch."
+            exit 0
           fi
 
-        # If it's *used* but not declared, add a declaration near the top.
-        if ! grep -q 'DECLARE_RWSEM(shrinker_rwsem)' mm/vmscan.c; then
-        echo "Patching mm/vmscan.c to declare shrinker_rwsem"
-        tmpfile=$(mktemp)
+          if ! grep -q 'DECLARE_RWSEM(shrinker_rwsem)' mm/vmscan.c; then
+            echo "Patching mm/vmscan.c to declare shrinker_rwsem"
+            tmpfile=$(mktemp)
 
-      awk '
-        NR==1 {
-          print "#include <linux/rwsem.h>"
-          print "DECLARE_RWSEM(shrinker_rwsem);"
-        }
-        { print }
-      ' mm/vmscan.c > "$tmpfile"
+            awk '
+              NR==1 {
+                print "#include <linux/rwsem.h>"
+                print "DECLARE_RWSEM(shrinker_rwsem);"
+              }
+              { print }
+            ' mm/vmscan.c > "$tmpfile"
 
-      mv "$tmpfile" mm/vmscan.c
-    else
-      echo "shrinker_rwsem already declared, nothing to do."
-    fi
-    
+            mv "$tmpfile" mm/vmscan.c
+          else
+            echo "shrinker_rwsem already declared, nothing to do."
+          fi
+
       - name: "🎶 Build kernel"
         working-directory: ./${{ env.kernelDir }}/${{ env.kernelName }}
         env:
           args: ${{ steps.generate-args.outputs.args }}
         run: |
           echo "PATH Variable: $PATH"
-          make ${args}
+          echo "Using make args: $args"
+
+          # Run build and save full log
+          make $args V=1 2>&1 | tee build.log
+          build_rc=${PIPESTATUS[}
+
+          echo "=== Last 80 lines of build.log ==="
+          tail -n 80 build.log || true
+
+          echo "=== Lines containing 'error' (case-insensitive) ==="
+          grep -i "error" build.log || true
+
+          exit $build_rc
 
       - name: "🏴‍☠️ Post Action "
         run: |
           pwd
-          find ./${{ env.kernelDir }}/${{ env.OUT_DIR }}/arch/${{ env.ARCH }}/ -type f
+          find ./${{ env.kernelDir }}/${{ env.OUT_DIR }}/arch/${{ env.ARCH }}/ -type f || true
 
       - name: "💛 Upload Image"
         uses: actions/upload-artifact@v4
