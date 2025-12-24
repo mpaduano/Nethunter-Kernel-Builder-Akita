@@ -222,7 +222,33 @@ jobs:
           echo "CONFIG_OF_CONFIGFS=y" >> .config
           echo "CONFIG_OF_OVERLAY=y" >> .config
           cat .config
+          
+- name: "🐞 Patch shrinker_rwsem in vmscan"
+  working-directory: ./${{ env.kernelDir }}/${{ env.kernelName }}
+  run: |
+    echo "Checking for shrinker_rwsem declaration in mm/vmscan.c..."
+    if ! grep -q 'shrinker_rwsem' mm/vmscan.c; then
+      echo "No references to shrinker_rwsem found in vmscan.c, skipping patch."
+      exit 0
+    fi
 
+    # If it's *used* but not declared, add a declaration near the top.
+    if ! grep -q 'DECLARE_RWSEM(shrinker_rwsem)' mm/vmscan.c; then
+      echo "Patching mm/vmscan.c to declare shrinker_rwsem"
+      tmpfile=$(mktemp)
+
+      awk '
+        NR==1 {
+          print "#include <linux/rwsem.h>"
+          print "DECLARE_RWSEM(shrinker_rwsem);"
+        }
+        { print }
+      ' mm/vmscan.c > "$tmpfile"
+
+      mv "$tmpfile" mm/vmscan.c
+    else
+      echo "shrinker_rwsem already declared, nothing to do."
+    fi
       - name: "🎶 Build kernel"
         working-directory: ./${{ env.kernelDir }}/${{ env.kernelName }}
         env:
