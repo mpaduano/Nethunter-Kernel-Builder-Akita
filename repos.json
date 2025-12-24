@@ -1,9 +1,10 @@
-[  {
+[
+  {
     "kernelSource": {
-      "name": "Tensor101 NetHunter",
-      "repo": "https://github.com/gs-bluraviole/android_kernel_google_gs101/kernel/configs/",
-      "branch": "android-gs-raviole-6.1-android15-qpr2",
-      "device": "bluejay"
+      "name": "android_kernel_google_zuma",
+      "repo": "https://github.com/kerneltoast/android_kernel_google_zuma",
+      "branch": "16.0.0-sultan",
+      "device": "akita"
     },
     "withKernelSU": true,
     "toolchains": [
