@@ -9,16 +9,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      ARCH: arm64
-      KERNEL_REPO: https://android.googlesource.com/kernel/google/akita  # Corrected URL
-      KERNEL_REF: 6.1             # adjust to the correct branch or tag if needed
-      DEFCONFIG: zuma_defconfig   # verify this is the correct defconfig for akita/zuma
-      CROSS_PREFIX: aarch64-linux-gnu-
-      ANYKERNEL_REPO: https://github.com/osm0sis/AnyKernel3.git
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+  env:
+    ARCH: arm64
+    KERNEL_REPO: https://github.com/<user>/Pixel-8a-Akita-Kernel  # Your mirror repo URL
+    KERNEL_REF: 6.1
+    DEFCONFIG: zuma_defconfig
+    CROSS_PREFIX: aarch64-linux-gnu-
+    ANYKERNEL_REPO: https://github.com/osm0sis/AnyKernel3.git
+      steps:
+    -   name: Checkout repository
+        uses: actions/checkout@v4
 
     - name: Install system dependencies & clang (LLVM)
       run: |
