@@ -3,14 +3,14 @@ name: Build Kernel for Pixel 8a (Akita)
 on:
   push:
     branches:
-      - main  # Trigger on push to main branch (change as needed)
+      - main
   pull_request:
     branches:
-      - main  # Trigger on pull request to main branch (change as needed)
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout the repository
@@ -20,6 +20,10 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y clang llvm gcc-aarch64-linux-gnu make git wget
+
+    - name: List directory structure (for debugging)
+      run: |
+        ls -R device_google_akita-kernels_6.1
 
     - name: Set up kernel repository
       run: |
@@ -32,8 +36,9 @@ jobs:
 
     - name: Add gki_defconfig from Android Source
       run: |
-        cd device_google_akita-kernels_6.1/arch/arm64/configs
-        curl -o gki_defconfig https://android.googlesource.com/kernel/common/+/refs/heads/android-gs-akita-android16/arch/arm64/configs/gki_defconfig?format=TEXT
+        # This step assumes gki_defconfig is placed in the correct directory
+        cd device_google_akita-kernels_6.1
+        curl -o arch/arm64/configs/gki_defconfig https://android.googlesource.com/kernel/common/+/refs/heads/android-gs-akita-android16/arch/arm64/configs/gki_defconfig?format=TEXT
 
     - name: Configure the kernel for Pixel 8a (Akita)
       run: |
@@ -48,11 +53,10 @@ jobs:
 
     - name: Archive the kernel image
       run: |
-        # Create an archive of the kernel image
         tar -czvf kernel_image.tar.gz out/arch/arm64/boot/Image
 
     - name: Upload the kernel image artifact
-      uses: actions/upload-artifact@v4  # Updated to v4
+      uses: actions/upload-artifact@v4
       with:
         name: kernel-image
         path: kernel_image.tar.gz
