@@ -11,8 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ARCH: arm64
-      KERNEL_REPO: https://android.googlesource.com/kernel/google/akita  # Corrected URL
-      KERNEL_REF: android-14             # Update to the correct branch for Android 14 kernel
+      KERNEL_REPO: https://github.com/Biohazardousrom/device_google_akita-kernels_6.1  # Corrected URL
+      KERNEL_REF: 16            # Update to the correct branch for Android 14 kernel
       DEFCONFIG: zuma_defconfig   # verify this is the correct defconfig for akita/zuma
       CROSS_PREFIX: aarch64-linux-gnu-
       ANYKERNEL_REPO: https://github.com/osm0sis/AnyKernel3.git
