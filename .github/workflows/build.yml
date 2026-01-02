@@ -47,7 +47,7 @@ jobs:
         tar -czvf kernel_image.tar.gz out/arch/arm64/boot/Image
 
     - name: Upload the kernel image artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3  # Updated to v3
       with:
         name: kernel-image
         path: kernel_image.tar.gz
