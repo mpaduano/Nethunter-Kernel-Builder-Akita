@@ -1,8 +1,8 @@
 {
   "kernels": {
     "akita": {
-      "url": "https://android.googlesource.com/device/google/akita-kernels",
-      "branch": "6.1",
+      "url": "https://github.com/Biohazardousrom/device_google_akita-kernels_6.1",
+      "branch": "16",
       "defconfig": "zuma_defconfig",
       "anykernel": "https://github.com/osm0sis/AnyKernel3",
       "params": {
