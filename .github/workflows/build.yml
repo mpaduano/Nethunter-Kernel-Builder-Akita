@@ -9,91 +9,103 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-  env:
-    ARCH: arm64
-    KERNEL_REPO: https://github.com/<user>/Pixel-8a-Akita-Kernel  # Your mirror repo URL
-    KERNEL_REF: 6.1
-    DEFCONFIG: zuma_defconfig
-    CROSS_PREFIX: aarch64-linux-gnu-
-    ANYKERNEL_REPO: https://github.com/osm0sis/AnyKernel3.git
-      steps:
-    -   name: Checkout repository
+    env:
+      ARCH: arm64
+      KERNEL_REPO: https://android.googlesource.com/device/google/akita-kernels/6.1
+      KERNEL_REF: 6.1
+      DEFCONFIG: zuma_defconfig
+      CROSS_PREFIX: aarch64-linux-gnu-
+      ANYKERNEL_REPO: https://github.com/osm0sis/AnyKernel3.git
+
+    steps:
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-    - name: Install system dependencies & clang (LLVM)
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y --no-install-recommends \
-          build-essential \
-          git \
-          curl \
-          wget \
-          bc \
-          bison \
-          flex \
-          libssl-dev \
-          libelf-dev \
-          python3 \
-          python3-dev \
-          cmake \
-          ninja-build \
-          ccache \
-          gcc-aarch64-linux-gnu \
-          gcc-arm-linux-gnueabi \
-          clang \
-          lld
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/ccache
+          key: ${{ runner.os }}-ccache-${{ env.ARCH }}-${{ env.KERNEL_REF }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-${{ env.ARCH }}-
+            ${{ runner.os }}-ccache-
 
-    - name: Show tool versions
-      run: |
-        clang --version || true
-        aarch64-linux-gnu-gcc --version || true
-        gcc --version
+      - name: Install system dependencies & clang (LLVM)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            git \
+            curl \
+            wget \
+            bc \
+            bison \
+            flex \
+            libssl-dev \
+            libelf-dev \
+            python3 \
+            python3-dev \
+            cmake \
+            ninja-build \
+            ccache \
+            gcc-aarch64-linux-gnu \
+            gcc-arm-linux-gnueabi \
+            clang-17 \
+            lld-17
 
-    - name: Clone kernel source
-      run: |
-        git clone --depth 1 -b $KERNEL_REF $KERNEL_REPO kernel
+      - name: Show tool versions
+        run: |
+          clang-17 --version || true
+          aarch64-linux-gnu-gcc --version || true
+          gcc --version
+          ccache --version || true
 
-    - name: Prepare kernel config
-      working-directory: kernel
-      run: |
-        # Ensure the defconfig exists and apply it if not already done
-        if ! grep -q "$DEFCONFIG" .config; then
-          make O=out ARCH=$ARCH $DEFCONFIG
-        fi
-        # (Optional) modify .config here if needed
-        make O=out ARCH=$ARCH defconfig
+      - name: Clone kernel source
+        run: |
+          git clone --depth 1 -b $KERNEL_REF $KERNEL_REPO kernel
 
-    - name: Build kernel (Clang + cross toolchain)
-      working-directory: kernel
-      run: |
-        # Use clang as the compiler, provide GNU cross-toolchain prefix for binutils
-        export CC=clang
-        export CROSS_COMPILE=$CROSS_PREFIX
-        export LLVM=1
-        # Parallel build - adjust concurrency if necessary
-        make -C . O=out ARCH=$ARCH CC=$CC CROSS_COMPILE=$CROSS_COMPILE -j$(nproc)
+      - name: Prepare kernel config
+        working-directory: kernel
+        run: |
+          # Apply the defconfig into O=out (only if not present)
+          if [ ! -f out/.config ]; then
+            make O=out ARCH=$ARCH $DEFCONFIG
+          fi
+          # Generate final config; olddefconfig will keep existing answers where possible
+          make O=out ARCH=$ARCH olddefconfig || true
 
-    - name: Clone AnyKernel3 and package
-      run: |
-        git clone --depth 1 $ANYKERNEL_REPO AnyKernel3
-        # adjust these paths/names to match what your kernel build produces
-        # common targets: out/arch/arm64/boot/Image, Image.gz, Image.gz-dtb, dtbs
-        if [ -f kernel/out/arch/arm64/boot/Image.gz-dtb ]; then
-          cp kernel/out/arch/arm64/boot/Image.gz-dtb AnyKernel3/Image.gz-dtb
-        elif [ -f kernel/out/arch/arm64/boot/Image ]; then
-          cp kernel/out/arch/arm64/boot/Image AnyKernel3/Image
-        else
-          echo "Kernel image not found; listing tree for debugging:"
-          ls -R kernel/out || true
-          exit 1
-        fi
-        cd AnyKernel3
-        # ensure anykernel script is executable
-        chmod +x anykernel.sh
-        ./anykernel.sh
+      - name: Build kernel (Clang + cross toolchain)
+        working-directory: kernel
+        run: |
+          # Use pinned clang as the compiler and provide GNU cross-toolchain prefix for binutils
+          export CC=clang-17
+          export CROSS_COMPILE=$CROSS_PREFIX
+          export LLVM=1
+          # Parallel build - adjust concurrency if necessary
+          make -C . O=out ARCH=$ARCH CC=$CC CROSS_COMPILE=$CROSS_COMPILE -j$(nproc)
 
-    - name: Upload packaged artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: anykernel-package
-        path: AnyKernel3/*.zip
+      - name: Clone AnyKernel3 and package
+        run: |
+          git clone --depth 1 $ANYKERNEL_REPO AnyKernel3
+          # adjust these paths/names to match what your kernel build produces
+          # common targets: out/arch/arm64/boot/Image, Image.gz, Image.gz-dtb, dtbs
+          if [ -f kernel/out/arch/arm64/boot/Image.gz-dtb ]; then
+            cp kernel/out/arch/arm64/boot/Image.gz-dtb AnyKernel3/Image.gz-dtb
+          elif [ -f kernel/out/arch/arm64/boot/Image ]; then
+            cp kernel/out/arch/arm64/boot/Image AnyKernel3/Image
+          else
+            echo "Kernel image not found; listing tree for debugging:"
+            ls -R kernel/out || true
+            exit 1
+          fi
+          cd AnyKernel3
+          # ensure anykernel script is executable
+          chmod +x anykernel.sh
+          ./anykernel.sh
+
+      - name: Upload packaged artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: anykernel-package
+          path: AnyKernel3/*.zip
