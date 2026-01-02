@@ -30,6 +30,11 @@ jobs:
       run: |
         git clone https://github.com/osm0sis/AnyKernel3.git
 
+    - name: Add gki_defconfig from Android Source
+      run: |
+        cd device_google_akita-kernels_6.1/arch/arm64/configs
+        curl -o gki_defconfig https://android.googlesource.com/kernel/common/+/refs/heads/android-gs-akita-android16/arch/arm64/configs/gki_defconfig?format=TEXT
+
     - name: Configure the kernel for Pixel 8a (Akita)
       run: |
         cd device_google_akita-kernels_6.1
