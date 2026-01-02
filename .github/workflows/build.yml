@@ -45,6 +45,11 @@ jobs:
         # Download gki_defconfig from the Android source repository
         curl -o arch/arm64/configs/gki_defconfig https://android.googlesource.com/kernel/common/+/refs/heads/android-gs-akita-android16/arch/arm64/configs/gki_defconfig?format=TEXT
 
+    - name: Verify that gki_defconfig exists
+      run: |
+        # Verify the file exists in the expected directory
+        ls -l device_google_akita-kernels_6.1/arch/arm64/configs/
+
     - name: Configure the kernel for Pixel 8a (Akita)
       run: |
         cd device_google_akita-kernels_6.1
