@@ -34,6 +34,11 @@ jobs:
       run: |
         git clone https://github.com/osm0sis/AnyKernel3.git
 
+    - name: Ensure the directory exists for gki_defconfig
+      run: |
+        # Create the necessary directory for the defconfig if it doesn't exist
+        mkdir -p device_google_akita-kernels_6.1/arch/arm64/configs
+
     - name: Add gki_defconfig from Android Source
       run: |
         cd device_google_akita-kernels_6.1
