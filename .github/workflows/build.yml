@@ -13,7 +13,7 @@ jobs:
       ARCH: arm64
       KERNEL_REPO: https://github.com/Biohazardousrom/device_google_akita-kernels_6.1  # Corrected URL
       KERNEL_REF: 16            # Update to the correct branch for Android 14 kernel
-      DEFCONFIG: gki_defconfig   # verify this is the correct defconfig for akita/zuma
+      DEFCONFIG: defconfig   # verify this is the correct defconfig for akita/zuma
       CROSS_PREFIX: aarch64-linux-gnu-
       ANYKERNEL_REPO: https://github.com/osm0sis/AnyKernel3.git
     steps:
