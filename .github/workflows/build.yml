@@ -3,14 +3,14 @@ name: Build Kernel for Pixel 8a (Akita)
 on:
   push:
     branches:
-      - main
+      - main  # Trigger on push to main branch (change as needed)
   pull_request:
     branches:
-      - main
+      - main  # Trigger on pull request to main branch (change as needed)
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
 
     steps:
     - name: Checkout the repository
@@ -21,14 +21,14 @@ jobs:
         sudo apt update
         sudo apt install -y clang llvm gcc-aarch64-linux-gnu make git wget
 
-    - name: List directory structure (for debugging)
-      run: |
-        ls -R device_google_akita-kernels_6.1
-
     - name: Set up kernel repository
       run: |
         # Clone the BiohazardousROM kernel repo (change if needed)
         git clone --branch 16 https://github.com/Biohazardousrom/device_google_akita-kernels_6.1.git
+
+    - name: List directory structure (for debugging)
+      run: |
+        ls -R device_google_akita-kernels_6.1
 
     - name: Set up AnyKernel3 repo
       run: |
@@ -36,8 +36,8 @@ jobs:
 
     - name: Add gki_defconfig from Android Source
       run: |
-        # This step assumes gki_defconfig is placed in the correct directory
         cd device_google_akita-kernels_6.1
+        # Download gki_defconfig from the Android source repository
         curl -o arch/arm64/configs/gki_defconfig https://android.googlesource.com/kernel/common/+/refs/heads/android-gs-akita-android16/arch/arm64/configs/gki_defconfig?format=TEXT
 
     - name: Configure the kernel for Pixel 8a (Akita)
@@ -56,7 +56,7 @@ jobs:
         tar -czvf kernel_image.tar.gz out/arch/arm64/boot/Image
 
     - name: Upload the kernel image artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v4  # Updated to v4
       with:
         name: kernel-image
         path: kernel_image.tar.gz
