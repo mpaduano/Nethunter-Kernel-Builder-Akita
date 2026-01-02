@@ -1,35 +1,22 @@
-[
-  {
-    "kernelSource": {
-      "name": "android_kernel_google_zuma",
-      "repo": "https://github.com/kerneltoast/android_kernel_google_zuma",
-      "branch": "16.0.0-sultan",
-      "device": "akita"
-    },
-    "withKernelSU": true,
-    "toolchains": [
-      {
-        "repo": "https://android.googlesource.com/platform/prebuilts/gas/linux-x86",
-        "branch": "master",
-        "name": "gas"
+{
+  "kernels": {
+    "akita": {
+      "url": "https://android.googlesource.com/device/google/akita-kernels",
+      "branch": "6.1",
+      "defconfig": "zuma_defconfig",
+      "anykernel": "https://github.com/osm0sis/AnyKernel3",
+      "params": {
+        "ARCH": "arm64",
+        "CROSS_COMPILE": "aarch64-linux-gnu-",
+        "CROSS_COMPILE_ARM32": "arm-linux-gnueabi-",
+        "CROSS_COMPILE_COMPAT": "arm-linux-gnueabi-",
+        "CLANG_TRIPLE": "aarch64-linux-gnu-",
+        "AR": "",
+        "CC": "clang"
       },
-      {
-        "repo": "https://gitlab.com/ThankYouMario/android_prebuilts_clang-standalone/",
-        "branch": "18",
-        "name": "clang"
+      "extraParams": {
+        "KEEP": ""
       }
-    ],
-    "params": {
-      "ARCH": "arm64",
-      "CROSS_COMPILE": "aarch64-linux-gnu-",
-      "CROSS_COMPILE_ARM32": "arm-linux-gnueabi-",
-      "CROSS_COMPILE_COMPAT": "arm-linux-gnueabi-",
-      "CLANG_TRIPLE": "aarch64-linux-gnu-",
-      "AR": "",
-      "CC": "clang"
-    },
-    "extraParams": {
-      "KEEP": ""
     }
   }
-]
+}
