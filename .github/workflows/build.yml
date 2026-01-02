@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ARCH: arm64
-      KERNEL_REPO: https://android.googlesource.com/device/google/akita-kernels
+      KERNEL_REPO: https://android.googlesource.com/kernel/google/akita  # Corrected URL
       KERNEL_REF: 6.1             # adjust to the correct branch or tag if needed
       DEFCONFIG: zuma_defconfig   # verify this is the correct defconfig for akita/zuma
       CROSS_PREFIX: aarch64-linux-gnu-
@@ -56,8 +56,8 @@ jobs:
     - name: Prepare kernel config
       working-directory: kernel
       run: |
-        # Ensure the defconfig exists
-        if ! grep -R --line-number "^$DEFCONFIG" .config >/dev/null 2>&1; then
+        # Ensure the defconfig exists and apply it if not already done
+        if ! grep -q "$DEFCONFIG" .config; then
           make O=out ARCH=$ARCH $DEFCONFIG
         fi
         # (Optional) modify .config here if needed
