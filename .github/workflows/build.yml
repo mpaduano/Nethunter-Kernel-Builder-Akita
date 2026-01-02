@@ -3,14 +3,14 @@ name: Build Kernel for Pixel 8a (Akita)
 on:
   push:
     branches:
-      - main  # Trigger on push to main branch (change as needed)
+      - main
   pull_request:
     branches:
-      - main  # Trigger on pull request to main branch (change as needed)
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout the repository
@@ -21,52 +21,51 @@ jobs:
         sudo apt update
         sudo apt install -y clang llvm gcc-aarch64-linux-gnu make git wget
 
-    - name: Set up kernel repository
+    - name: Set up kernel repository (clone kernel/common branch)
       run: |
-        # Clone the BiohazardousROM kernel repo (change if needed)
-        git clone --branch 16 https://github.com/Biohazardousrom/device_google_akita-kernels_6.1.git
+        # Clone the Android kernel/common repo at the akita branch
+        git clone --branch android-gs-akita-android16 https://android.googlesource.com/kernel/common kernel_common
 
-    - name: List directory structure (for debugging)
+    - name: List kernel tree (for debugging)
       run: |
-        ls -R device_google_akita-kernels_6.1
+        ls -R kernel_common | sed -n '1,200p'
 
     - name: Set up AnyKernel3 repo
       run: |
         git clone https://github.com/osm0sis/AnyKernel3.git
 
-    - name: Ensure the directory exists for gki_defconfig
+    - name: Verify kernel top-level and available defconfigs
       run: |
-        # Create the necessary directory for the defconfig if it doesn't exist
-        mkdir -p device_google_akita-kernels_6.1/arch/arm64/configs
-
-    - name: Add gki_defconfig from Android Source
-      run: |
-        cd device_google_akita-kernels_6.1
-        # Download gki_defconfig from the Android source repository
-        curl -o arch/arm64/configs/gki_defconfig https://android.googlesource.com/kernel/common/+/refs/heads/android-gs-akita-android16/arch/arm64/configs/gki_defconfig?format=TEXT
-
-    - name: Verify that gki_defconfig exists
-      run: |
-        # Verify the file exists in the expected directory
-        ls -l device_google_akita-kernels_6.1/arch/arm64/configs/
+        set -eux
+        cd kernel_common
+        if [ ! -f Makefile ]; then
+          echo "ERROR: No top-level Makefile found in kernel_common. Cannot run make."
+          ls -la
+          exit 1
+        fi
+        echo "Top of Makefile:"; head -n 5 Makefile || true
+        echo "arch/arm64/configs contents:"; ls -la arch/arm64/configs || true
+        grep -R --line-number 'gki_defconfig' arch/arm64/configs || true
 
     - name: Configure the kernel for Pixel 8a (Akita)
       run: |
-        cd device_google_akita-kernels_6.1
-        # Apply the gki_defconfig
+        set -eux
+        cd kernel_common
+        # Apply the gki_defconfig (should exist in this kernel tree)
         make O=out ARCH=arm64 gki_defconfig
 
     - name: Build the kernel
       run: |
-        cd device_google_akita-kernels_6.1
+        set -eux
+        cd kernel_common
         make O=out ARCH=arm64 -j$(nproc)
 
     - name: Archive the kernel image
       run: |
-        tar -czvf kernel_image.tar.gz out/arch/arm64/boot/Image
+        tar -czvf kernel_image.tar.gz kernel_common/out/arch/arm64/boot/Image || true
 
     - name: Upload the kernel image artifact
-      uses: actions/upload-artifact@v4  # Updated to v4
+      uses: actions/upload-artifact@v4
       with:
         name: kernel-image
         path: kernel_image.tar.gz
