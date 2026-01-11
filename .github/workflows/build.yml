@@ -46,20 +46,20 @@ jobs:
         echo "Top of Makefile:"; head -n 5 Makefile || true
         echo "arch/arm64/configs contents:"; ls -la arch/arm64/configs || true
         grep -R --line-number 'defconfig' arch/arm64/configs || true
-
-    - name: Configure the kernel for Pixel 8a (Akita)
-      run: |
-        set -eux
-        cd kernel_common
-        # Apply the gki_defconfig (should exist in this kernel tree)
-        make O=out ARCH=arm64 defconfig
         
     - name: Install build dependencies 
         run  |
         sudo apt-get update 
         sudo apt-get install -y build-essential bc bison flex libncurses-dev libssl-dev libelf-dev pkg-config gcc-aarch64-linux-gnu
        
-    -name: Build the kernel
+    - name: Configure the kernel for Pixel 8a (Akita)
+      run: |
+        set -eux
+        cd kernel_common
+        # Apply the defconfig (should exist in this kernel tree)
+        make O=out ARCH=arm64 defconfig
+        
+    - name: Build the kernel
       run: |
         set -eux
         cd kernel_common
