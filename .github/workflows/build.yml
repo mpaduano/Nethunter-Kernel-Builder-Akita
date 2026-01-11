@@ -24,8 +24,7 @@ jobs:
     - name: Set up kernel repository (clone kernel/common branch)
       run: |
         # Clone the Android kernel/common repo at the akita branch
-           git clone --branch lineage-23.0 https://github.com/LineageOS/android_device_google_akita-kernels
-
+         git clone --branch android-gs-akita-android16 https://android.googlesource.com/kernel/common kernel_common
 
     - name: List kernel tree (for debugging)
       run: |
