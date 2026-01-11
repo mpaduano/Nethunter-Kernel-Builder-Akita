@@ -1,9 +1,9 @@
 {
   "kernels": {
     "akita": {
-      "url": "https://github.com/Biohazardousrom/device_google_akita-kernels_6.1",
-      "branch": "16",
-      "defconfig": "zuma_defconfig",
+      "url": "https://github.com/LineageOS/android_kernel_google_gs-6.1_manifest",
+      "branch": "lineage-23.0",
+      "defconfig": "defconfig",
       "anykernel": "https://github.com/osm0sis/AnyKernel3",
       "params": {
         "ARCH": "arm64",
