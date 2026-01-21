@@ -1,15 +1,15 @@
 [  {
     "kernelSource": {
-      "name": "Tensor201 NetHunter",
-      "repo": "https://github.com/LineageOS/android_device_google_akita",
-      "branch": "lineage-23.0",
+      "name": "AKITA ASOP",
+      "repo": "https://android.googlesource.com/kernel/devices/google/akita",
+      "branch": "android-gs-akita-android15-qpr2-beta",
       "device": "akita"
     },
     "withKernelSU": true,
     "toolchains": [
       {
-        "repo": "https://github.com/LineageOS/android_device_google_akita-kernels",
-        "branch": "linwage-23.0",
+        "repo": "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86",
+        "branch": "android-gs-akita-6.1-android15-qpr2-beta",
         "name": "lineage"
       },
       {
