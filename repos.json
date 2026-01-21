@@ -16,7 +16,7 @@
       },
       "device": {
         "repo": "https://github.com/LineageOS/android_device_google_akita",
-        "branch": "lineage-22.3"
+        "branch": "lineage-22.2"
       }
     },
 
