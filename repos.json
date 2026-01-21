@@ -1,7 +1,7 @@
 [  {
     "kernelSource": {
       "name": "akita",
-      "repo": "https://android.googlesource.com/kernel/common",
+      "repo": "https://android.googlesource.com/kernel/build",
       "branch": "android-gs-akita-6.1-android15-qpr2",
       "device": "akita"
     },
