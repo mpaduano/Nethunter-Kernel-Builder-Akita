@@ -77,8 +77,8 @@ jobs:
         working-directory: kernel
         run: |
           bazel build \
-            ${{ join(matrix.bazel.configs, ' ') && format('--config={0}', join(matrix.bazel.configs, ' --config=')) }} \
-            ${{ matrix.bazel.target }}
+          --config=fast \
+          //common:kernel_aarch64_dist
 
       - name: 📦 Collect artifacts
         run: |
