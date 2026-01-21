@@ -1,7 +1,7 @@
 [  {
     "kernelSource": {
       "name": "AKITA ASOP",
-      "repo": "https://android.googlesource.com/kernel/devices/google/akita",
+      "repo": "hhttps://android.googlesource.com/kernel/configs/",
       "branch": "android-gs-akita-android15-qpr2-beta",
       "device": "akita"
     },
