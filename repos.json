@@ -15,7 +15,7 @@
         "branch": "android-gs-akita-6.1-android15-qpr2"
       },
       "device": {
-        "repo": "https://android.googlesource.com/kernel/google-devices/akita",
+        "repo": "https://android.googlesource.com/kernel/devices/google/akita",
         "branch": "android-gs-akita-6.1-android15-qpr2"
       }
     },
