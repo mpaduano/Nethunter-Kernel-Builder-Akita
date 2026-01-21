@@ -8,16 +8,19 @@
     "kernelSources": {
       "common": {
         "repo": "https://android.googlesource.com/kernel/common",
-        "branch": "android-gs-akita-6.1-android15-qpr2"
+        "tags": "android-15.0.0_r0.16"
       },
       "modules": {
         "repo": "https://github.com/LineageOS/android_device_google_akita-kernels",
         "branch": "lineage-23.0"
       },
       "device": {
-        "repo": "https://github.com/LineageOS/android_device_google_akita",
-        "branch": "lineage-22.2"
-      }
+        "repo": "https://android.googlesource.com/kernel/devices/google/akita",
+        "branch": "android-gs-akita-6.1-android15-qpr2"
+      },
+        "manifest": {
+        "repo": "git clone https://github.com/etnperlong/manifest-6.1-akita",
+        "branch": "android-gs-akita-6.1-android15"
     },
 
     "bazel": {
