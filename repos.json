@@ -15,8 +15,8 @@
         "branch": "lineage-23.0"
       },
       "device": {
-        "repo": "https://android.googlesource.com/kernel/devices/google/akita",
-        "branch": "android-gs-akita-6.1-android15-qpr2"
+        "repo": "https://github.com/LineageOS/android_device_google_akita",
+        "branch": "lineage-22.3"
       }
     },
 
