@@ -72,6 +72,11 @@ jobs:
             -b ${{ matrix.kernelSources.device.branch }} \
             ${{ matrix.kernelSources.device.repo }} \
             google-devices/akita
+            
+      - name: 🧩 Fix Bazel workspace
+        run: |
+          cd kernel
+          cp common/WORKSPACE .
 
       - name: 🚀 Build kernel with Bazel
         working-directory: kernel
