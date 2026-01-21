@@ -1,8 +1,8 @@
 [  {
     "kernelSource": {
-      "name": "akita-kernels",
-      "repo": "https://github.com/Biohazardousrom/device_google_akita-kernels_6.1",
-      "branch": "16",
+      "name": "akita",
+      "repo": "https://android.googlesource.com/kernel/common",
+      "branch": "android-gs-akita-6.1-android15-qpr2",
       "device": "akita"
     },
     "withKernelSU": false,
