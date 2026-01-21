@@ -1,13 +1,13 @@
 [  {
     "kernelSource": {
       "name": "akita",
-      "repo": "https://android.googlesource.com/kernel/build",
+      "repo": "https://android.googlesource.com/kernel/common",
       "branch": "android-gs-akita-6.1-android15-qpr2",
       "device": "akita"
     },
     "withKernelSU": false,
     "toolchains": [
-      {
+      {co
         "repo": "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86",
         "branch": "android-gs-akita-6.1-android15-qpr2-beta",
         "name": "lineage"
