@@ -74,7 +74,7 @@ jobs:
             google-devices/akita
 
       - name: 🚀 Build kernel with Bazel
-        working-directory: kernel/common
+        working-directory: kernel
         run: |
           bazel build \
             ${{ join(matrix.bazel.configs, ' ') && format('--config={0}', join(matrix.bazel.configs, ' --config=')) }} \
