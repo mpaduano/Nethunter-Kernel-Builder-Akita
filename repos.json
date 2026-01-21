@@ -11,24 +11,18 @@
         "branch": "android-gs-akita-6.1-android15-qpr2"
       },
       "modules": {
-        "repo": "https://github.com/LineageOS/android_device_google_akita-kernels",
-        "branch": "lineage-23.0"
-      },
-      "device": {
-        "repo": "https://android.googlesource.com/kernel/devices/google/akita",
+        "repo": "https://android.googlesource.com/kernel/google-modules",
         "branch": "android-gs-akita-6.1-android15-qpr2"
       },
-      "manifest": {
-        "repo": "git clone https://github.com/etnperlong/manifest-6.1-akita",
-        "branch": "android-gs-akita-6.1-android15"
-      }  
+      "device": {
+        "repo": "https://android.googlesource.com/kernel/google-devices/akita",
+        "branch": "android-gs-akita-6.1-android15-qpr2"
+      }
     },
 
     "bazel": {
       "target": "//common:kernel_aarch64_dist",
-      "configs": [
-        "fast"
-      ]
+      "configs": ["fast"]
     },
 
     "features": {
@@ -37,11 +31,7 @@
     },
 
     "artifacts": {
-      "collect": [
-        "Image",
-        "vmlinux",
-        "*.img"
-      ]
+      "collect": ["Image", "vmlinux", "*.img"]
     }
   }
 ]
