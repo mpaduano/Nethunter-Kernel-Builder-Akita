@@ -8,15 +8,15 @@
     "kernelSources": {
       "common": {
         "repo": "https://android.googlesource.com/kernel/common",
-        "branch": "android15-6.1"
+        "branch": "android-gs-akita-6.1-android15-qpr2"
       },
       "modules": {
-        "repo": "https://android.googlesource.com/kernel/google-modules",
-        "branch": "android15-6.1"
+        "repo": "https://github.com/LineageOS/android_device_google_akita-kernels",
+        "branch": "lineage-23.0"
       },
       "device": {
-        "repo": "https://android.googlesource.com/kernel/google-devices/akita",
-        "branch": "android15-6.1"
+        "repo": "https://android.googlesource.com/kernel/devices/google/akita",
+        "branch": "android-gs-akita-6.1-android15-qpr2"
       }
     },
 
