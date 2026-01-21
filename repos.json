@@ -18,7 +18,7 @@
         "repo": "https://android.googlesource.com/kernel/devices/google/akita",
         "branch": "android-gs-akita-6.1-android15-qpr2"
       },
-        "manifest": {
+      "manifest": {
         "repo": "git clone https://github.com/etnperlong/manifest-6.1-akita",
         "branch": "android-gs-akita-6.1-android15"
     },
