@@ -1,34 +1,43 @@
-[  {
-    "kernelSource": {
-      "name": "akita",
-      "repo": "https://github.com/LineageOS/android_device_google_akita",
-      "branch": "lineage-22.2",
-      "device": "akita"
-    },
-    "withKernelSU": false,
-    "toolchains": [
-      {
-        "repo": "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86",
-        "branch": "android-gs-akita-6.1-android15-qpr2-beta",
-        "name": "lineage"
+[
+  {
+    "name": "pixel8a-akita",
+    "androidVersion": "15",
+    "kernelVersion": "6.1",
+    "buildSystem": "bazel",
+
+    "kernelSources": {
+      "common": {
+        "repo": "https://android.googlesource.com/kernel/common",
+        "branch": "android15-6.1"
       },
-      {
-        "repo": "https://gitlab.com/ThankYouMario/android_prebuilts_clang-standalone/",
-        "branch": "18",
-        "name": "clang"
+      "modules": {
+        "repo": "https://android.googlesource.com/kernel/google-modules",
+        "branch": "android15-6.1"
+      },
+      "device": {
+        "repo": "https://android.googlesource.com/kernel/google-devices/akita",
+        "branch": "android15-6.1"
       }
-    ],
-    "params": {
-      "ARCH": "arm64",
-      "CROSS_COMPILE": "aarch64-linux-gnu-",
-      "CROSS_COMPILE_ARM32": "arm-linux-gnueabi-",
-      "CROSS_COMPILE_COMPAT": "arm-linux-gnueabi-",
-      "CLANG_TRIPLE": "aarch64-linux-gnu-",
-      "AR": "",
-      "CC": "clang"
     },
-    "extraParams": {
-      "KEEP": ""
+
+    "bazel": {
+      "target": "//common:kernel_aarch64_dist",
+      "configs": [
+        "fast"
+      ]
+    },
+
+    "features": {
+      "kernelSU": false,
+      "nethunter": false
+    },
+
+    "artifacts": {
+      "collect": [
+        "Image",
+        "vmlinux",
+        "*.img"
+      ]
     }
   }
 ]
