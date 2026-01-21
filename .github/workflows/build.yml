@@ -73,10 +73,26 @@ jobs:
             ${{ matrix.kernelSources.device.repo }} \
             google-devices/akita
             
-      - name: 🧩 Fix Bazel workspace
+      - name: 🧩 Create Bazel workspace
         run: |
-            cd kernel
-            cp common/WORKSPACE.bazel ./WORKSPACE.bazel
+          cat << 'EOF' > kernel/WORKSPACE.bazel
+          workspace(name = "pixel_kernel")
+
+            local_repository(
+              name = "common",
+              path = "common",
+            )
+
+            local_repository(
+              name = "google_modules",
+              path = "google-modules",
+            )
+
+            local_repository(
+              name = "google_devices",
+              path = "google-devices",
+            )
+            EOF
 
       - name: 🚀 Build kernel with Bazel
         working-directory: kernel
