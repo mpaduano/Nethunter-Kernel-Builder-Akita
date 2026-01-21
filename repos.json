@@ -11,7 +11,7 @@
         "branch": "android-gs-akita-6.1-android15-qpr2"
       },
       "modules": {
-        "repo": "https://android.googlesource.com/kernel/google-modules",
+        "repo": "git clone https://android.googlesource.com/kernel/google-modules/soc/gs",
         "branch": "android-gs-akita-6.1-android15-qpr2"
       },
       "device": {
