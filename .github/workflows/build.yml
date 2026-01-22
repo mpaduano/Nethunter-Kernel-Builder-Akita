@@ -1,136 +1,39 @@
-name: Build Pixel 8a Kernel (Bazel)
-
-env:
-  CONFIGURATION: repos.json
-  KERNEL_DIR: kernel
+name: Build Nethunter Kernel (Akita)
 
 on:
   workflow_dispatch:
 
 jobs:
-  parse-repos:
-    name: 📜 Parse repos.json
-    runs-on: ubuntu-22.04
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - name: 📦 Checkout
-        uses: actions/checkout@v4
-
-      - name: 🔎 Generate matrix
-        id: set-matrix
-        run: |
-          echo "matrix<<EOF" >> $GITHUB_OUTPUT
-          cat $CONFIGURATION >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
   build:
-    name: 🧱 Bazel Kernel Build
-    runs-on: ubuntu-22.04
-    needs: parse-repos
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJSON(needs.parse-repos.outputs.matrix) }}
+    runs-on: ubuntu-latest
 
     steps:
-      - name: 📦 Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 🧰 Install dependencies
+      - name: 🧩 Create Bazel workspace
         run: |
-          sudo apt update
-          sudo apt install -y \
-            bc bison flex libssl-dev \
-            build-essential git zip unzip \
-            python3 python3-pip curl rsync \
-            libelf-dev dwarves jq
+          rm -f kernel/WORKSPACE.bazel
+          echo 'workspace(name = "pixel_kernel")' > kernel/WORKSPACE.bazel
+          echo '' >> kernel/WORKSPACE.bazel
+          echo 'local_repository(' >> kernel/WORKSPACE.bazel
+          echo '    name = "common",' >> kernel/WORKSPACE.bazel
+          echo '    path = "common"' >> kernel/WORKSPACE.bazel
+          echo ')' >> kernel/WORKSPACE.bazel
+          echo '' >> kernel/WORKSPACE.bazel
+          echo 'local_repository(' >> kernel/WORKSPACE.bazel
+          echo '    name = "google_modules",' >> kernel/WORKSPACE.bazel
+          echo '    path = "google-modules"' >> kernel/WORKSPACE.bazel
+          echo ')' >> kernel/WORKSPACE.bazel
+          echo '' >> kernel/WORKSPACE.bazel
+          echo 'local_repository(' >> kernel/WORKSPACE.bazel
+          echo '    name = "google_devices",' >> kernel/WORKSPACE.bazel
+          echo '    path = "google-devices"' >> kernel/WORKSPACE.bazel
+          echo ')' >> kernel/WORKSPACE.bazel
 
-      - name: 🛠 Install Bazel
+      - name: 🔍 Debug WORKSPACE
         run: |
-          curl -LO https://github.com/bazelbuild/bazel/releases/download/6.5.0/bazel-6.5.0-linux-x86_64
-          chmod +x bazel-6.5.0-linux-x86_64
-          sudo mv bazel-6.5.0-linux-x86_64 /usr/local/bin/bazel
-          bazel --version
+          cat -A kernel/WORKSPACE.bazel
 
-      - name: 🧬 Clone kernel sources
-        run: |
-          mkdir -p $KERNEL_DIR
-          cd $KERNEL_DIR
-
-          git clone \
-            -b ${{ matrix.kernelSources.common.branch }} \
-            ${{ matrix.kernelSources.common.repo }} \
-            common
-
-          git clone \
-            -b ${{ matrix.kernelSources.modules.branch }} \
-            ${{ matrix.kernelSources.modules.repo }} \
-            google-modules
-
-          git clone \
-            -b ${{ matrix.kernelSources.device.branch }} \
-            ${{ matrix.kernelSources.device.repo }} \
-            google-devices/akita
-            
-      - name: 🧩 Create Bazel workspace (FORCED)
-  run: |
-    rm -f kernel/WORKSPACE.bazel
-    printf '%s\n' \
-'workspace(name = "pixel_kernel")' \
-'' \
-'local_repository(' \
-'    name = "common",' \
-'    path = "common"' \
-')' \
-'' \
-'local_repository(' \
-'    name = "google_modules",' \
-'    path = "google-modules"' \
-')' \
-'' \
-'local_repository(' \
-'    name = "google_devices",' \
-'    path = "google-devices"' \
-')' \
-    > kernel/WORKSPACE.bazel
-
-- name: 🔍 BYTE-LEVEL WORKSPACE DEBUG
-  run: |
-    echo "===== cat -A ====="
-    cat -A kernel/WORKSPACE.bazel
-
-    echo
-    echo "===== hexdump ====="
-    hexdump -C kernel/WORKSPACE.bazel
-
-- name: 🔍 Confirm Bazel WORKSPACE path
-  run: |
-    pwd
-    ls -l kernel/WORKSPACE.bazel
-    realpath kernel/WORKSPACE.bazel
-
-
-      - name: 🚀 Build kernel with Bazel
+      - name: 🚀 Build kernel
         working-directory: kernel
-        run: |
-          bazel build \
-          //common:kernel_aarch64_dist
-
-      - name: 📦 Collect artifacts
-        run: |
-          mkdir -p out
-
-          DIST_DIR=kernel/common/bazel-bin/common/kernel_aarch64_dist
-          ls -lah $DIST_DIR || true
-
-          cp $DIST_DIR/Image out/ 2>/dev/null || true
-          cp $DIST_DIR/vmlinux out/ 2>/dev/null || true
-          cp $DIST_DIR/*.img out/ 2>/dev/null || true
-
-      - name: 💾 Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: pixel8a-android15-6.1-kernel
-          path: out/
-          retention-days: 7
+        run: bazel build //common:kernel_aarch64_dist
