@@ -73,26 +73,43 @@ jobs:
             ${{ matrix.kernelSources.device.repo }} \
             google-devices/akita
             
-      - name: 🧩 Create Bazel workspace
-        run: |
-          cat > kernel/WORKSPACE.bazel <<'EOF'
-          workspace(name = "pixel_kernel")
+      - name: 🧩 Create Bazel workspace (FORCED)
+  run: |
+    rm -f kernel/WORKSPACE.bazel
+    printf '%s\n' \
+'workspace(name = "pixel_kernel")' \
+'' \
+'local_repository(' \
+'    name = "common",' \
+'    path = "common"' \
+')' \
+'' \
+'local_repository(' \
+'    name = "google_modules",' \
+'    path = "google-modules"' \
+')' \
+'' \
+'local_repository(' \
+'    name = "google_devices",' \
+'    path = "google-devices"' \
+')' \
+    > kernel/WORKSPACE.bazel
 
-            local_repository(
-              name = "common",
-              path = "common"
-            )
+- name: 🔍 BYTE-LEVEL WORKSPACE DEBUG
+  run: |
+    echo "===== cat -A ====="
+    cat -A kernel/WORKSPACE.bazel
 
-            local_repository(
-              name = "google_modules",
-              path = "google-modules"
-            )
+    echo
+    echo "===== hexdump ====="
+    hexdump -C kernel/WORKSPACE.bazel
 
-            local_repository(
-              name = "google_devices",
-              path = "google-devices"
-            )
-            EOF
+- name: 🔍 Confirm Bazel WORKSPACE path
+  run: |
+    pwd
+    ls -l kernel/WORKSPACE.bazel
+    realpath kernel/WORKSPACE.bazel
+
 
       - name: 🚀 Build kernel with Bazel
         working-directory: kernel
