@@ -75,22 +75,22 @@ jobs:
             
       - name: 🧩 Create Bazel workspace
         run: |
-          cat << 'EOF' > kernel/WORKSPACE.bazel
+          cat > kernel/WORKSPACE.bazel <<'EOF'
           workspace(name = "pixel_kernel")
 
             local_repository(
               name = "common",
-              path = "common",
+              path = "common"
             )
 
             local_repository(
               name = "google_modules",
-              path = "google-modules",
+              path = "google-modules"
             )
 
             local_repository(
               name = "google_devices",
-              path = "google-devices",
+              path = "google-devices"
             )
             EOF
 
