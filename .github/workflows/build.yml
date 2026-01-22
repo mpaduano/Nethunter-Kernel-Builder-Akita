@@ -13,6 +13,7 @@ jobs:
 
       - name: 🧩 Create Bazel workspace
         run: |
+          mkdir -p kernel
           rm -f kernel/WORKSPACE.bazel
 
           echo 'workspace(name = "pixel_kernel")' > kernel/WORKSPACE.bazel
