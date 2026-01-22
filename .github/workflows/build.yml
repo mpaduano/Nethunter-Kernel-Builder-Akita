@@ -8,32 +8,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
       - name: 🧩 Create Bazel workspace
         run: |
           rm -f kernel/WORKSPACE.bazel
+
           echo 'workspace(name = "pixel_kernel")' > kernel/WORKSPACE.bazel
           echo '' >> kernel/WORKSPACE.bazel
+
           echo 'local_repository(' >> kernel/WORKSPACE.bazel
-          echo '    name = "common",' >> kernel/WORKSPACE.bazel
+          echo '    name = "common"' >> kernel/WORKSPACE.bazel
           echo '    path = "common"' >> kernel/WORKSPACE.bazel
           echo ')' >> kernel/WORKSPACE.bazel
           echo '' >> kernel/WORKSPACE.bazel
+
           echo 'local_repository(' >> kernel/WORKSPACE.bazel
-          echo '    name = "google_modules",' >> kernel/WORKSPACE.bazel
+          echo '    name = "google_modules"' >> kernel/WORKSPACE.bazel
           echo '    path = "google-modules"' >> kernel/WORKSPACE.bazel
           echo ')' >> kernel/WORKSPACE.bazel
           echo '' >> kernel/WORKSPACE.bazel
+
           echo 'local_repository(' >> kernel/WORKSPACE.bazel
-          echo '    name = "google_devices",' >> kernel/WORKSPACE.bazel
+          echo '    name = "google_devices"' >> kernel/WORKSPACE.bazel
           echo '    path = "google-devices"' >> kernel/WORKSPACE.bazel
           echo ')' >> kernel/WORKSPACE.bazel
 
-      - name: 🔍 Debug WORKSPACE
+      - name: 🔍 Debug WORKSPACE (byte-safe)
         run: |
+          echo "===== cat -A ====="
           cat -A kernel/WORKSPACE.bazel
 
       - name: 🚀 Build kernel
         working-directory: kernel
-        run: bazel build //common:kernel_aarch64_dist
+        run: |
+          bazel build //common:kernel_aarch64_dist
