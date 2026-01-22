@@ -1,23 +1,25 @@
-[  {
-    "kernelSource": {
-      "name": "akita",
-      "repo": "https://github.com/LineageOS/android_device_google_akita",
-      "branch": "lineage-22.2",
-      "device": "akita"
-    },
-    "withKernelSU": false,
-    "toolchains": [
-      {
-        "repo": "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86",
-        "branch": "android-gs-akita-6.1-android15-qpr2-beta",
-        "name": "lineage"
+[
+  {
+    "name": "pixel8a-akita-BioHaz",
+    "androidVersion": "15",
+    "kernelVersion": "6.1",
+    "buildSystem": "bazel",
+
+    "kernelSources": {
+      "common": {
+        "repo": "https://github.com/Biohazardousrom/kernel_common-6.1",
+        "branch": "16"
       },
-      {
-        "repo": "https://gitlab.com/ThankYouMario/android_prebuilts_clang-standalone/",
-        "branch": "18",
-        "name": "clang"
+      "modules": {
+        "repo": "https://android.googlesource.com/kernel/google-modules/soc/gs",
+        "branch": "android-gs-akita-6.1-android15-qpr2"
+      },
+      "device": {
+        "repo": "https://github.com/Biohazardousrom/device_google_akita-kernels_6.1",
+        "branch": "16"
       }
-    ],
+    },
+
     "params": {
       "ARCH": "arm64",
       "CROSS_COMPILE": "aarch64-linux-gnu-",
